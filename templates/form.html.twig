@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+	<div class="boxProTabulku">
+    {{ form_start(form) }}
+		{% if chyba %}
+			<span class="chyba">
+			{{ chyba }}
+			</span>
+		{% endif %}
+        {{ form_row(form.datum) }}
+        {{ form_row(form.lokalita) }}
+		<hr>
+        {{ form_row(form.pohlavi) }}
+        {{ form_row(form.chovani) }}
+        {{ form_row(form.vyska) }}
+        {{ form_row(form.vaha) }}
+		<hr>
+		{{ form_row(form.pozorovatel) }}
+		{{ form_row(form.pozorovatel_typ) }}
+		
+        {{ form_row(form.submit) }}
+    {{ form_end(form) }}
+	</div>
+{% endblock %}

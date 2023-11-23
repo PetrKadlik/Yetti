@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+		<div id="zaznamPopis">
+        {{ obsah | raw }}
+		</div>
+		<p>
+		<div id="tlacitkaHodnoceni">Hodnocení důvěryhodnosti pozorování:<br>
+		<button id="tlacitkoAno">Určitě pravé &#128077;</button>
+		<button id="tlacitkoMozna">Těžko říct, zda je to pravé &#129300;</button>
+		<button id="tlacitkoNe">Určitě falešné &#128078;</button>
+		</div>
+<script>
+var zaznamTitulek = document.getElementsByTagName("h2")[0];
+var zaznamPopis = document.getElementById("zaznamPopis");
+var tlacitkaHodnoceni = document.getElementById("tlacitkaHodnoceni");
+var tlacitkoAno = document.getElementById("tlacitkoAno");
+var tlacitkoMozna = document.getElementById("tlacitkoMozna");
+var tlacitkoNe = document.getElementById("tlacitkoNe");
+var id = "{{ id }}";
+var overeni = "{{ overeni }}"; 
+var historie = 0;
+
+// vyhodnoceni tlacitek
+tlacitkoAno.addEventListener("click", function() {
+	var volba=1;
+	var barva = "green";
+	odeslatVolbu(volba, barva);
+})
+tlacitkoMozna.addEventListener("click", function() {
+	var volba=0;
+	var barva = "blue";
+	odeslatVolbu(volba, barva);
+})
+tlacitkoNe.addEventListener("click", function() {
+	var volba=-1;
+	var barva = "red";
+	odeslatVolbu(volba, barva);
+})
+
+
+
+
+
+// zobrazit volbu a odeslat
+function odeslatVolbu(volba, barva) {
+	var xhr = new XMLHttpRequest();
+	var url = "{{ path('hodnoceni') }}";
+
+	// predani historie uzivatelskych voleb
+	if (historie == 0) {
+	    historie = id;
+	} else {
+		historie = historie + 'x' + id;
+	}	
+	
+	url = url + "?id=" + encodeURIComponent(id) + "&volba=" + encodeURIComponent(volba) + "&overeni=" + encodeURIComponent(overeni) + "&historie=" + encodeURIComponent(historie);
+	
+
+
+    xhr.open("GET", url, true);
+    xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+
+	// nastavit funkci, která se zavolá, když se změní stav požadavku
+	xhr.onreadystatechange = function() {
+		// pokud je požadavek dokončen a úspěšný
+		if (xhr.readyState == 4 && xhr.status == 200) {
+			var data = JSON.parse(xhr.responseText);
+
+
+			id = data.id;
+			overeni = data.overeni;
+			if (id <= 0) {
+				// vypnout tlacitka				
+				tlacitkaHodnoceni.style.transition = "opacity 0.5s"; 
+				tlacitkaHodnoceni.style.opacity = 0;
+				
+				// pokud již není co hodnotit, tak přesměrovat na jinou stránku, aby nemohlo dojít k opakovanému hlasování
+				// pred přesměrováním počkat, aby proběhl grafický efekt
+				if (id == 0) {
+					var bliknutiOpacity = 0;
+					setTimeout(function(){
+					   window.location.href = window.location.origin + "/podekovani";
+					}, 1100);
+				} else {
+					var bliknutiOpacity = 1;
+				}
+				
+			} else {
+				var bliknutiOpacity = 1;
+			
+			}
+		
+			// nastaveni efektu při změně záznamu
+			zaznamTitulek.style.color = barva; 
+			zaznamTitulek.style.transition = "opacity 1s"; 
+			zaznamTitulek.style.opacity = 0;
+			zaznamPopis.style.transition = "opacity 0.7s"; 
+			zaznamPopis.style.opacity = 0;
+			
+			// tituek a obsah se měni jinou rychlostí a přes jinou barvu, proto dvě funkce
+			zaznamTitulek.addEventListener("transitionend", function() {
+				zaznamTitulek.innerHTML = `${data.h2}`;
+				zaznamTitulek.style.opacity = bliknutiOpacity;
+				zaznamTitulek.style.color = "black"; 
+			});	
+			
+			zaznamPopis.addEventListener("transitionend", function() {
+				zaznamPopis.innerHTML = `${data.obsah}`;
+				zaznamPopis.style.opacity = bliknutiOpacity;
+			});
+
+		}
+    };
+    // odeslat požadavek
+	xhr.send();
+};
+
+</script>
+
+{% endblock %}

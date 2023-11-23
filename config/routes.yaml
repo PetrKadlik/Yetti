@@ -1,0 +1,50 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+
+index:
+ path: /
+ controller: App\Controller\IndexController::index	
+ 
+vypis:
+ path: /vypis/{strana}/{razeni}
+ defaults:  { _controller: App\Controller\VypisController::index, strana: 1, razeni: null  }
+ requirements:
+  strana:  '\d+'
+  razeni:  '[a-zA-Z0-9]*'
+  
+datail:
+ path: /detail/{detail}
+ defaults:  { _controller: App\Controller\DetailController::index, detail: 1 }
+ requirements:
+  strana:  '\d+'
+ 
+zapis:
+ path: /zapis
+ controller: App\Controller\ZapisController::index	
+
+hodnoceni:
+ path: /hodnoceni/{detail}
+ defaults:  { _controller: App\Controller\HodnoceniController::index, detail: null}  
+ requirements:
+  detail:  '\d+'
+
+podekovani:
+ path: /podekovani
+ controller: App\Controller\PodekovaniController::index	
+    
+statistika:
+ path: /statistika/{strana}/{razeni}
+ defaults:  { _controller: App\Controller\StatistikaController::index, strana: 1, razeni: null  }
+ requirements:
+  strana:  '\d+'
+  razeni:  '[a-zA-Z0-9]*'
+       
+app_fallback:
+ path: /{catchall}
+ defaults: { _controller: App\Controller\FallbackController::index }
+ requirements:
+  catchall: .*
+  
+  
+ 
